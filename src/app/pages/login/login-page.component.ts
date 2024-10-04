@@ -1,5 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AuthService } from '../../core/auth/auth.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -13,6 +15,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 export class LoginPageComponent implements OnInit {
     loginForm!: FormGroup;
     private readonly formBuilder = inject(FormBuilder);
+    private readonly authService = inject(AuthService);
+    private readonly destoyRef = inject(DestroyRef);
 
     constructor() { }
 
@@ -27,8 +31,10 @@ export class LoginPageComponent implements OnInit {
       if (!this.loginForm.valid) {
         return;
       }
+      const loginData = this.loginForm.value;
+      this.authService.login(loginData)
+        .pipe(takeUntilDestroyed(this.destoyRef)).subscribe();
 
-      console.log(this.loginForm.value);
     }
 
 }
