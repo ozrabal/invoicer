@@ -4,6 +4,7 @@ import {catchError} from "rxjs/operators";
 import { Login, LoginResponse, LoginSuccess } from '../../types';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { JwtHelperService } from '@auth0/angular-jwt';
 
 
 @Injectable({
@@ -12,6 +13,7 @@ import { Router } from '@angular/router';
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly jwtHelper = inject(JwtHelperService);
 
   login(body: Login): Observable<LoginResponse> {
     return this.http.post<LoginResponse>('http://localhost:3002/auth/login', body)
@@ -41,5 +43,9 @@ export class AuthService {
   storeToken(data: LoginSuccess) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('refreshToken', data.refreshToken);
+  }
+
+  isAuthenticated(): boolean {
+    return !this.jwtHelper.isTokenExpired();
   }
 }
