@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable, of, tap } from 'rxjs';
-import {catchError} from "rxjs/operators";
+import { catchError } from "rxjs/operators";
 import { Login, LoginResponse, LoginSuccess } from '../../types';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -47,5 +47,26 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !this.jwtHelper.isTokenExpired();
+  }
+
+  refreshToken(): Observable<LoginResponse> {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      this.logout();
+      return of();
+    }
+    return this.http.post<LoginResponse>('http://localhost:3002/auth/refresh', {refreshToken})
+    .pipe(
+      catchError(error => {
+        this.logout();
+        return of();
+      }),
+      tap(data => {
+        const loginSuccessData = data as LoginSuccess;
+        if (loginSuccessData.token) {
+          this.storeToken(loginSuccessData);
+        }
+      })
+    );
   }
 }
