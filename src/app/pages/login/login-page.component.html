@@ -1,0 +1,7 @@
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-2 max-w-xs p-2 mx-auto items-start">
+  <h1 class="text-2xl font-bold">Login</h1>
+  <input formControlName="email" type="email" placeholder="Email" />
+  <input formControlName="password" type="password" placeholder="Password" />
+  <button type="submit" [disabled]="loginForm.invalid" class="flex items-center justify-center px-2 rounded py-1 bg-blue-500">Login</button>
+</form>
+
