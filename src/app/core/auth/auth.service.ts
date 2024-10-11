@@ -2,11 +2,11 @@ import { inject, Injectable, DestroyRef } from '@angular/core';
 import { Observable, of, tap } from 'rxjs';
 import { catchError } from "rxjs/operators";
 import { Login, LoginResponse, LoginSuccess } from '../../types';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-
+import { IS_PUBLIC } from './auth.interceptor';
 
 @Injectable({
   providedIn: 'root'
@@ -17,9 +17,10 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly jwtHelper = inject(JwtHelperService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly CONTEXT = {context: new HttpContext().set(IS_PUBLIC, true)};
 
   login(body: Login): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>('http://localhost:3002/auth/login', body)
+    return this.http.post<LoginResponse>('http://localhost:3002/auth/login', body, this.CONTEXT)
     .pipe(
       catchError(error => {
         if (error.status === 401) {
@@ -58,7 +59,7 @@ export class AuthService {
       this.logout();
       return of();
     }
-    return this.http.post<LoginResponse>('http://localhost:3002/auth/refresh', {refreshToken})
+    return this.http.post<LoginResponse>('http://localhost:3002/auth/refresh', {refreshToken}, this.CONTEXT)
     .pipe(
       catchError(error => {
         this.logout();
